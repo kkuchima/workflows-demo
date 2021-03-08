@@ -162,7 +162,7 @@ cd ~/floor
 ```
 
 ### 5-2. アプリケーションの作成
-以下の内容で app.py というファイルを作成します
+以下の内容で `app.py` というファイルを作成します
 ```bash
 import json
 import logging
@@ -189,7 +189,7 @@ else:
     app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
 ```
 
-以下の内容で Dockerfile というファイルを作成します
+以下の内容で `Dockerfile` というファイルを作成します
 ```bash
 # Use an official lightweight Python image.
 # https://hub.docker.com/_/python
@@ -212,6 +212,7 @@ CMD exec gunicorn --bind 0.0.0.0:8080 --workers 1 --threads 8 app:app
 ### 5-3. Cloud Run へのデプロイ
 作成したアプリケーションをコンテナにビルドします
 ```bash
+export GOOGLE_CLOUD_PROJECT=$(gcloud config list --format   "value(core.project)")
 export SERVICE_NAME=floor
 gcloud builds submit --tag gcr.io/${GOOGLE_CLOUD_PROJECT}/${SERVICE_NAME}
 ```
@@ -225,7 +226,7 @@ gcloud run deploy ${SERVICE_NAME} \
   --no-allow-unauthenticated
 ```
 生成された URL (下記フォーマット)は後ほど使うので書き留めておいてください
-https://floor-`<random-hash>`.run.app
+https://floor-< random-hash >.run.app
 
 ## 6. Cloud Workflows との接続
 Cloud Run と Cloud Workflows を接続する設定をします  
@@ -249,7 +250,8 @@ gcloud projects add-iam-policy-binding ${GOOGLE_CLOUD_PROJECT} \
 cd ~/workflows
 ```
 
-Cloud Workflows の構成ファイルを以下のように編集します  
+Cloud Workflows の構成ファイル`workflow.yaml`を以下のように編集します  
+Cloud Run のサービス URL は、前の手順で控えておいた URL に書き換えます。  
 (`api.mathjs.org` の API で引き渡された値を log に変換する処理も加えています)
 ```bash
 - randomgenFunction:
@@ -285,14 +287,6 @@ Cloud Workflows の構成ファイルを以下のように編集します
 ```
 
 ### 6-3. Cloud Workflows のデプロイ
-Cloud Workflows をデプロイします
-```bash
-gcloud beta workflows deploy workflow \
-    --source=workflow.yaml \
-    --service-account=${SERVICE_ACCOUNT}@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com
-```
-
-### 6-4. Cloud Workflows のデプロイ
 サービスアカウントを指定した Cloud Workflows をデプロイします
 ```bash
 gcloud beta workflows deploy workflow \
@@ -300,19 +294,18 @@ gcloud beta workflows deploy workflow \
     --service-account=${SERVICE_ACCOUNT}@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com
 ```
 
-### 6-5. Cloud Workflows の実行
+### 6-4. Cloud Workflows の実行
 メニュー左側の Tools > Workflows を選択します  
-image01  
+![image01](https://user-images.githubusercontent.com/47690801/110273380-d321bb00-800f-11eb-8a11-f0093ad01f0e.png)
 
 `workflow` という名前のワークフローを選択します  
-image02  
+![image02](https://user-images.githubusercontent.com/47690801/110273402-da48c900-800f-11eb-9573-30797f4d918c.png)
 
 画面右上の `EXECUTE` を選択します  
-image03  
+![image03](https://user-images.githubusercontent.com/47690801/110273413-dddc5000-800f-11eb-8758-7ecac19852a9.png)
 
 画面左下の `EXECUTE` をクリックしワークフローを実行します  
-image04  
+![image04](https://user-images.githubusercontent.com/47690801/110273416-de74e680-800f-11eb-90a5-964f80bb5ab0.png)
 
 画面右上の更新ボタンを押し、実行結果を確認します  
-image05  
-
+![image05](https://user-images.githubusercontent.com/47690801/110273417-df0d7d00-800f-11eb-84d6-a56df4bd3f92.png)
